@@ -1,20 +1,17 @@
 from flask import Flask, request, jsonify
-import openai
+from openai import OpenAI
 import os
 
 app = Flask(__name__)
 
-# مفتاح OpenAI API (يفضل تخزينه في متغير بيئة لاحقًا)
-openai.api_key = "YOUR_OPENAI_API_KEY"  # ← استبدليه بمفتاحك الحقيقي
+# تفعيل العميل الجديد
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route('/api', methods=['POST'])
 def receive_text():
     data = request.get_json()
     user_text = data.get("text", "")
 
-    print(f"📥 Received text: {user_text}")
-
-    # البرومت الذكي
     prompt = f"""
 أنا أطور جهاز يساعد الصم والبكم على التواصل. المستخدم قال: "{user_text}"
 اقترح ردين يعبرون عن رغبة المستخدم فقط، باللهجة الخليجية أو العربية البسيطة.
@@ -22,14 +19,13 @@ def receive_text():
 """
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=100,
             temperature=0.7
         )
 
-        reply_text = response["choices"][0]["message"]["content"]
+        reply_text = response.choices[0].message.content
         replies = [line.strip("-• ").strip() for line in reply_text.split("\n") if line.strip()]
 
         return jsonify({
@@ -40,5 +36,3 @@ def receive_text():
     except Exception as e:
         print("❌ Error:", str(e))
         return jsonify({"error": str(e)}), 500
-
-# لا نستخدم app.run() لأن Render يشغّل السيرفر باستخدام gunicorn
