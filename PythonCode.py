@@ -1,34 +1,23 @@
 from flask import Flask, request, jsonify
-import requests
+from huggingface_hub import InferenceClient
 import os
 
 app = Flask(__name__)
 HUGGINGFACE_API_TOKEN = os.getenv("meow")  # مفتاح البسبس 🐾
 HF_MODEL = "google/flan-t5-base"
 
+# إنشاء العميل
+client = InferenceClient(token=HUGGINGFACE_API_TOKEN)
+
 def get_huggingface_reply(user_text):
-    headers = {
-        "Authorization": f"Bearer {HUGGINGFACE_API_TOKEN}"
-    }
-    payload = {
-        "inputs": f"اقترح ردين يعبرون عن رغبة المستخدم فقط، باللهجة الخليجية أو العربية البسيطة. النص: {user_text}",
-        "parameters": {"max_new_tokens": 100}
-    }
-
-    response = requests.post(
-        f"https://api-inference.huggingface.co/models/{HF_MODEL}",
-        headers=headers,
-        json=payload
-    )
-
-    if response.status_code == 200:
-        result = response.json()
-        text = result[0]["generated_text"]
-        replies = [line.strip("-• ").strip() for line in text.split("\n") if line.strip()]
+    prompt = f"اقترح ردين يعبرون عن رغبة المستخدم فقط، باللهجة الخليجية أو العربية البسيطة. النص: {user_text}"
+    try:
+        response = client.text_generation(prompt, model=HF_MODEL, max_new_tokens=100)
+        replies = [line.strip("-• ").strip() for line in response.split("\n") if line.strip()]
         return replies[:2]
-    else:
-        print("❌ Hugging Face Error:", response.text)
-        return [f"❌ Error {response.status_code}", ""]
+    except Exception as e:
+        print("❌ Hugging Face Error:", str(e))
+        return [f"❌ Error: {str(e)}", ""]
 
 @app.route('/api', methods=['POST'])
 def receive_text():
