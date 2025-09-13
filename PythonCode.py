@@ -1,22 +1,27 @@
 from flask import Flask, request, jsonify
-from huggingface_hub import InferenceClient
+import openai
 import os
 
 app = Flask(__name__)
-HUGGINGFACE_API_TOKEN = os.getenv("meow")  # مفتاح البسبس 🐾
-HF_MODEL = "google/flan-t5-base"
 
-# إنشاء العميل
-client = InferenceClient(token=HUGGINGFACE_API_TOKEN)
+# مفتاح OpenAI من البيئة
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def get_huggingface_reply(user_text):
-    prompt = f"اقترح ردين يعبرون عن رغبة المستخدم فقط، باللهجة الخليجية أو العربية البسيطة. النص: {user_text}"
+def get_chatgpt_reply(user_text):
     try:
-        response = client.text_generation(prompt, model=HF_MODEL, max_new_tokens=100)
-        replies = [line.strip("-• ").strip() for line in response.split("\n") if line.strip()]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",  # أو gpt-4 إذا عندك صلاحية
+            messages=[
+                {"role": "system", "content": "أجب باللهجة الخليجية أو العربية البسيطة، واقترح ردين يعبرون عن رغبة المستخدم فقط"},
+                {"role": "user", "content": user_text}
+            ],
+            max_tokens=100
+        )
+        full_text = response.choices[0].message.content
+        replies = [line.strip("-• ").strip() for line in full_text.split("\n") if line.strip()]
         return replies[:2]
     except Exception as e:
-        print("❌ Hugging Face Error:", str(e))
+        print("❌ OpenAI Error:", str(e))
         return [f"❌ Error: {str(e)}", ""]
 
 @app.route('/api', methods=['POST'])
@@ -25,7 +30,7 @@ def receive_text():
     user_text = data.get("text", "")
 
     try:
-        replies = get_huggingface_reply(user_text)
+        replies = get_chatgpt_reply(user_text)
 
         return jsonify({
             "reply_1": replies[0] if len(replies) > 0 else "",
