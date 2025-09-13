@@ -15,8 +15,8 @@ def get_huggingface_reply(user_text):
         replies = [line.strip("-• ").strip() for line in response.split("\n") if line.strip()]
         return replies[:2]
     except Exception as e:
-        print("❌ Hugging Face Error:", str(e))
-        return [f"❌ Error: {str(e)}", ""]
+    print("❌ Hugging Face Error:", str(e))
+    return [f"❌ Error: {str(e)}", ""]
 
 @app.route('/api', methods=['POST'])
 def receive_text():
@@ -38,3 +38,4 @@ def receive_text():
 @app.route('/', methods=['GET'])
 def home():
     return "✅ السيرفر شغّال"
+
