@@ -12,11 +12,12 @@ def get_huggingface_reply(user_text):
     prompt = f"اقترح ردين يعبرون عن رغبة المستخدم فقط، باللهجة الخليجية أو العربية البسيطة. النص: {user_text}"
     try:
         response = client.text_generation(prompt, model=HF_MODEL, max_new_tokens=100)
+        print("📥 Raw Response:", response)  # للمراقبة
         replies = [line.strip("-• ").strip() for line in response.split("\n") if line.strip()]
         return replies[:2]
     except Exception as e:
-    print("❌ Hugging Face Error:", str(e))
-    return [f"❌ Error: {str(e)}", ""]
+        print("❌ Hugging Face Error:", str(e))
+        return [f"❌ Error: {str(e)}", ""]
 
 @app.route('/api', methods=['POST'])
 def receive_text():
@@ -38,4 +39,3 @@ def receive_text():
 @app.route('/', methods=['GET'])
 def home():
     return "✅ السيرفر شغّال"
-
