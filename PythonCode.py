@@ -46,3 +46,7 @@ def receive_text():
     except Exception as e:
         print("❌ Server Error:", str(e))
         return jsonify({"error": str(e)}), 500
+
+@app.route('/', methods=['GET'])
+def home():
+    return "✅ السيرفر شغّال"
