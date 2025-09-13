@@ -3,8 +3,6 @@ from openai import OpenAI
 import os
 
 app = Flask(__name__)
-
-# تفعيل العميل الجديد
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route('/api', methods=['POST'])
@@ -36,3 +34,4 @@ def receive_text():
     except Exception as e:
         print("❌ Error:", str(e))
         return jsonify({"error": str(e)}), 500
+
