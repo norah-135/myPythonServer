@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 HUGGINGFACE_API_TOKEN = os.getenv("meow")  # مفتاح البسبس 🐾
-HF_MODEL = "google/flan-t5-base"
+HF_MODEL = "tiiuae/falcon-7b-instruct"     # ✅ النموذج الجديد
 
 client = InferenceClient(token=HUGGINGFACE_API_TOKEN)
 
@@ -39,5 +39,3 @@ def receive_text():
 @app.route('/', methods=['GET'])
 def home():
     return "✅ السيرفر شغّال"
-
-
