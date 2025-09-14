@@ -43,3 +43,7 @@ def receive_text():
 def home():
     print("✅ تم الوصول إلى الصفحة الرئيسية من Arduino أو المتصفح")
     return "✅ السيرفر شغّال وجاهز لاستقبال الطلبات"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))  # Render يرسل البورت هنا
+    app.run(host="0.0.0.0", port=port)
