@@ -14,6 +14,7 @@ def get_huggingface_reply(user_text):
         response = client.text_generation(prompt, model=HF_MODEL, max_new_tokens=100)
         print("📥 Raw Response:", response)
         replies = [line.strip("-• ").strip() for line in response.split("\n") if line.strip()]
+        print("📤 الرد الجاهز:", replies)
         return replies[:2]
     except Exception as e:
         print("❌ Hugging Face Error:", str(e))
@@ -21,8 +22,10 @@ def get_huggingface_reply(user_text):
 
 @app.route('/api', methods=['POST'])
 def receive_text():
+    print("📥 تم استقبال طلب من Arduino")
     data = request.get_json()
     user_text = data.get("text", "")
+    print("📝 النص المستلم:", user_text)
 
     try:
         replies = get_huggingface_reply(user_text)
@@ -38,4 +41,5 @@ def receive_text():
 
 @app.route('/', methods=['GET'])
 def home():
-    return "✅ السيرفر شغّال"
+    print("✅ تم الوصول إلى الصفحة الرئيسية من Arduino أو المتصفح")
+    return "✅ السيرفر شغّال وجاهز لاستقبال الطلبات"
